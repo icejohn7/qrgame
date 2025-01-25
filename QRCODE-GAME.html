@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Game</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .game-container {
+      text-align: center;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    h1 {
+      font-size: 2em;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    #instructions {
+      font-size: 1.1em;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    #sequence-box {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: #4CAF50;
+      background-color: #eaf8e0;
+      padding: 10px;
+      border-radius: 5px;
+      display: inline-block;
+    }
+
+    input {
+      width: 200px;
+      padding: 10px;
+      font-size: 1.2em;
+      margin-top: 20px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.3s ease-in-out;
+    }
+
+    input:focus {
+      border-color: #4CAF50;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      margin-top: 20px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    #result-message {
+      margin-top: 20px;
+      font-size: 1.3em;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Additional styling for the game state */
+    #sequence-box.hidden {
+      visibility: hidden; /* Hide the sequence box more securely */
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>Memory Game</h1>
+    <p id="instructions">Memorize the sequence shown below:</p>
+    <div id="sequence-box" class="hidden"></div>
+    <input type="text" id="player-input" class="hidden" placeholder="Enter the sequence">
+    <button id="start-button">Start Game</button>
+    <button id="submit-button" class="hidden">Submit</button>
+    <p id="result-message"></p>
+  </div>
+
+  <script>
+    // Get elements from the DOM
+    const startButton = document.getElementById("start-button");
+    const submitButton = document.getElementById("submit-button");
+    const sequenceBox = document.getElementById("sequence-box");
+    const playerInput = document.getElementById("player-input");
+    const resultMessage = document.getElementById("result-message");
+
+    let sequence = [];
+    let sequenceLength = 5;  // Set sequence length (you can change this value)
+    let timerDuration = 5000; // Time to memorize in milliseconds
+    let gameInProgress = false; // Track if a game is in progress
+
+    // Function to generate a random sequence
+    function generateSequence(length) {
+      const newSequence = [];
+      for (let i = 0; i < length; i++) {
+        newSequence.push(Math.floor(Math.random() * 10)); // Random numbers from 0-9
+      }
+      return newSequence;
+    }
+
+    // Start game button event listener
+    startButton.addEventListener("click", () => {
+      if (gameInProgress) return; // Prevent starting a new game while one is ongoing
+
+      gameInProgress = true;
+      startButton.disabled = true; // Disable the start button while game is in progress
+
+      sequence = generateSequence(sequenceLength);
+      sequenceBox.textContent = sequence.join(" ");
+      sequenceBox.classList.remove("hidden");
+      resultMessage.textContent = ""; // Clear result message
+      playerInput.value = ""; // Clear input box
+      playerInput.classList.add("hidden");
+      submitButton.classList.add("hidden");
+
+      // Hide the sequence after the timer ends
+      setTimeout(() => {
+        sequenceBox.classList.add("hidden"); // Hide sequence box more securely
+        playerInput.classList.remove("hidden");
+        submitButton.classList.remove("hidden");
+        playerInput.focus(); // Focus input field
+      }, timerDuration);
+    });
+
+    // Submit button event listener
+    submitButton.addEventListener("click", () => {
+      const playerSequence = playerInput.value.split("").map(Number);
+
+      // Validate input
+      if (playerSequence.some(isNaN)) {
+        resultMessage.textContent = "❌ Please enter a valid sequence of numbers.";
+        resultMessage.style.color = "orange";
+        return;
+      }
+
+      if (arraysEqual(sequence, playerSequence)) {
+        resultMessage.textContent = "🎉 Correct! You have a great memory!";
+        resultMessage.style.color = "green";
+      } else {
+        resultMessage.textContent = `❌ Incorrect! The correct sequence was ${sequence.join(" ")}`;
+        resultMessage.style.color = "red";
+      }
+
+      // Prepare for the next game
+      setTimeout(() => {
+        gameInProgress = false;
+        playerInput.value = "";
+        playerInput.classList.add("hidden");
+        submitButton.classList.add("hidden");
+        startButton.disabled = false; // Re-enable the start button
+      }, 2000);
+    });
+
+    // Function to compare two arrays
+    function arraysEqual(arr1, arr2) {
+      if (arr1.length !== arr2.length) return false;
+      for (let i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) return false;
+      }
+      return true;
+    }
+  </script>
+</body>
+</html>
